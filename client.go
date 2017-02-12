@@ -11,7 +11,7 @@ import (
 
 // Client represents a single KGB endpoint (expected to accept JSON-RPC commands as outlined in https://kgb.alioth.debian.org/kgb-protocol.html).
 type Client struct {
-	Addr string
+	Address string
 }
 
 // Project represents the combination of a KGB endpoint with a specific project ID and password (which is the means of "authentication" for the KGB protocol).
@@ -23,9 +23,9 @@ type Project struct {
 }
 
 // NewClient returns an instance of Client pointing at the referenced address.
-func NewClient(addr string) *Client {
+func NewClient(address string) *Client {
 	return &Client{
-		Addr: addr,
+		Address: address,
 	}
 }
 
@@ -106,19 +106,19 @@ func (p Project) jsonRPC(method string, params ...interface{}) (interface{}, err
 	reqJSON, err := json.Marshal(map[string]interface{}{
 		"method": method,
 		"params": params,
-		"id":     0,
+		"id":     42,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", p.Client.Addr+"/json-rpc", bytes.NewReader(reqJSON))
+	req, err := http.NewRequest("POST", p.Client.Address+"/json-rpc", bytes.NewReader(reqJSON))
 	if err != nil {
 		return nil, err
 	}
+	req.Header["Content-Type"] = []string{"application/json"}
 
-	req.Header["X-KGB-Project"] = []string{p.ID}
-
+	// X-KGB-Project: p.ID
 	// X-KGB-Auth: sha1_hex( p.Password + p.ID + reqJSON )
 	h := sha1.New()
 	_, err = io.WriteString(h, p.Password+p.ID)
@@ -130,6 +130,7 @@ func (p Project) jsonRPC(method string, params ...interface{}) (interface{}, err
 		return nil, err
 	}
 	auth := fmt.Sprintf("%x", h.Sum(nil))
+	req.Header["X-KGB-Project"] = []string{p.ID}
 	req.Header["X-KGB-Auth"] = []string{auth}
 
 	res, err := http.DefaultClient.Do(req)
