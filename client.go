@@ -149,6 +149,9 @@ func (p Project) jsonRPC(method string, params ...interface{}) (interface{}, err
 	if err != nil {
 		return nil, err
 	}
+	if decoder.More() {
+		return nil, fmt.Errorf("response unexpectedly contains more than a single JSON document")
+	}
 
 	if resErr, ok := ret["error"]; ok && resErr != nil {
 		return nil, fmt.Errorf("error result: %v", resErr)
