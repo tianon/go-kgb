@@ -133,6 +133,9 @@ func (p Project) jsonRPC(method string, params ...interface{}) (interface{}, err
 	req.Header["X-KGB-Project"] = []string{p.ID}
 	req.Header["X-KGB-Auth"] = []string{auth}
 
+	// XXX if we don't explictly close the connection after our request, the second request will re-use the same HTTP connection and will fail with EOF (and there's no obvious explanation for this behavior in the Perl code of kgb-bot)
+	req.Close = true
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
