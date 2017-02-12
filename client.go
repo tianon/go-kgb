@@ -1,4 +1,4 @@
-package kgb
+package kgb // import "go.tianon.xyz/kgb"
 
 import (
 	"bytes"
