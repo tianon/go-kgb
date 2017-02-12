@@ -18,7 +18,7 @@ type Client struct {
 type Project struct {
 	Client
 
-	Id       string
+	ID       string
 	Password string
 }
 
@@ -33,14 +33,14 @@ func NewClient(addr string) *Client {
 func (c Client) Project(id, password string) *Project {
 	return &Project{
 		Client:   c,
-		Id:       id,
+		ID:       id,
 		Password: password,
 	}
 }
 
 // RelayMessage invokes the "relay_message" method in the context of a Project.
 func (p Project) RelayMessage(msg string) error {
-	res, err := p.jsonRpc("relay_message", msg)
+	res, err := p.jsonRPC("relay_message", msg)
 	if err != nil {
 		return err
 	}
@@ -56,8 +56,9 @@ func (p Project) RelayMessage(msg string) error {
 	}
 }
 
-func (p Project) jsonRpc(method string, params ...interface{}) (interface{}, error) {
-	reqJson, err := json.Marshal(map[string]interface{}{
+// jsonRPC invokes the given JSON-RPC method, using the Project object to "authenticate" it via the "X-KGB-Auth" header.
+func (p Project) jsonRPC(method string, params ...interface{}) (interface{}, error) {
+	reqJSON, err := json.Marshal(map[string]interface{}{
 		"method": method,
 		"params": params,
 		"id":     0,
@@ -66,20 +67,20 @@ func (p Project) jsonRpc(method string, params ...interface{}) (interface{}, err
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", p.Client.Addr+"/json-rpc", bytes.NewReader(reqJson))
+	req, err := http.NewRequest("POST", p.Client.Addr+"/json-rpc", bytes.NewReader(reqJSON))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header["X-KGB-Project"] = []string{p.Id}
+	req.Header["X-KGB-Project"] = []string{p.ID}
 
-	// TODO X-KGB-Auth: sha1_hex( p.Password + p.Id + reqJson )
+	// X-KGB-Auth: sha1_hex( p.Password + p.ID + reqJSON )
 	h := sha1.New()
-	_, err = io.WriteString(h, p.Password+p.Id)
+	_, err = io.WriteString(h, p.Password+p.ID)
 	if err != nil {
 		return nil, err
 	}
-	_, err = h.Write(reqJson)
+	_, err = h.Write(reqJSON)
 	if err != nil {
 		return nil, err
 	}
