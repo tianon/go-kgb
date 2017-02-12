@@ -38,19 +38,64 @@ func (c Client) Project(id, password string) *Project {
 	}
 }
 
-// RelayMessage invokes the "relay_message" method in the context of a Project.
+// RelayMessage invokes the "relay_message" method in the context of a Project (see https://kgb.alioth.debian.org/kgb-protocol.html#relay_message_message).
 func (p Project) RelayMessage(msg string) error {
-	res, err := p.jsonRPC("relay_message", msg)
+	return p.jsonRPCExpectOK("relay_message", msg)
+}
+
+// CommitV4Args is for Project.CommitV4 (see https://kgb.alioth.debian.org/kgb-protocol.html#commit_v4_arguments).
+type CommitV4Args struct {
+	// A string identifying the commit in the version control system. Git (short) hash, Subversion revision number, this kind of thing.
+	CommitId string `json:"commit_id"`
+
+	// A string to prepend to the commit ID when displaying on IRC. r is particularly useful for Subversion repositories.
+	RevPrefix string `json:"rev_prefix"`
+
+	// A string representing the commit author.
+	Author string `json:"author"`
+
+	// A string representing the commit branch.
+	Branch string `json:"branch"`
+
+	// A string representing the commit module or sub-project.
+	Module string `json:"module"`
+
+	// The commit message.
+	CommitLog string `json:"commit_log"`
+
+	// List of changes files/directories in the commit. Each string is a path, optionaly prepended with (A) for added paths, (M) for modified paths and (D) for deleted paths. If no prefix is given modification is assumed. An additional plus sign flags property changes (Specific to Subversion term), e.g. (M+).
+	Changes []string `json:"changes"`
+
+	// A map with additional parameters. Currently supported members are:
+	//
+	// web_link: A URL with commit details (e.g. gitweb or viewvc).
+	//
+	// use_irc_notices: A flag whether to use IRC notices instead of regular messages.
+	//
+	// use_color: A flag whether to use colors when sending commit notifications. Defaults to 1.
+	Extra map[string]interface{} `json:"extra"`
+}
+
+// Commitv4 invokes the "commit_v4" method in the context of a Project (see https://kgb.alioth.debian.org/kgb-protocol.html#commit_v4_arguments).
+func (p Project) CommitV4(args CommitV4Args) error {
+	return p.jsonRPCExpectOK("commit_v4", args)
+}
+
+// jsonRPCExpectOK invokes the given JSON-RPC method (as in Project.jsonRPC), but also validates that the result is the string "OK".
+func (p Project) jsonRPCExpectOK(method string, params ...interface{}) error {
+	res, err := p.jsonRPC(method, params...)
 	if err != nil {
 		return err
 	}
 
 	switch str := res.(type) {
 	case string:
-		if str != "OK" {
-			return fmt.Errorf(`result not "OK": %q`, str)
+		// "relay_message" returns "OK"
+		// "commit_v4" returns ""
+		if str == "OK" || str == "" {
+			return nil
 		}
-		return nil
+		return fmt.Errorf(`result not "OK": %q`, str)
 	default:
 		return fmt.Errorf(`unexpected result: %v`, res)
 	}

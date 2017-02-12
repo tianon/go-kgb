@@ -14,7 +14,25 @@ The primary goal of this package is to faithfully represent the protocol describ
 	func main() {
 		project := kgb.NewClient("http://localhost:5391").Project("example-repo-id", "example-repo-password")
 
-		err := project.RelayMessage("hi y'all!")
+		err := project.RelayMessage("hi, y'all!")
+		if err != nil {
+			panic(err)
+		}
+
+		err = project.CommitV4(kgb.CommitV4Args{
+			CommitId:  "beefcake",
+			Author:    "The Real Slim Shady",
+			Branch:    "master",
+			CommitLog: "Updated the evil master plan",
+			Changes: []string{
+				"M master-plan.md",
+			},
+			Extra: map[string]interface{}{
+				"web_link":        "https://godoc.org/go.tianon.xyz/kgb",
+				"use_irc_notices": 1,
+				"use_color":       1,
+			},
+		})
 		if err != nil {
 			panic(err)
 		}
