@@ -9,10 +9,12 @@ import (
 	"net/http"
 )
 
+// Client represents a single KGB endpoint (expected to accept JSON-RPC commands as outlined in https://kgb.alioth.debian.org/kgb-protocol.html).
 type Client struct {
 	Addr string
 }
 
+// Project represents the combination of a KGB endpoint with a specific project ID and password (which is the means of "authentication" for the KGB protocol).
 type Project struct {
 	Client
 
@@ -20,12 +22,14 @@ type Project struct {
 	Password string
 }
 
+// NewClient returns an instance of Client pointing at the referenced address.
 func NewClient(addr string) *Client {
 	return &Client{
 		Addr: addr,
 	}
 }
 
+// Project returns a Project instance using the given project ID and password.
 func (c Client) Project(id, password string) *Project {
 	return &Project{
 		Client:   c,
@@ -34,6 +38,7 @@ func (c Client) Project(id, password string) *Project {
 	}
 }
 
+// RelayMessage invokes the "relay_message" method in the context of a Project.
 func (p Project) RelayMessage(msg string) error {
 	res, err := p.jsonRpc("relay_message", msg)
 	if err != nil {
