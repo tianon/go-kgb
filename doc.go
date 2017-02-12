@@ -3,6 +3,8 @@ Package kgb provides functions for interacting with "kgb-bot".
 
 See https://packages.debian.org/kgb-bot and/or https://kgb.alioth.debian.org/ for information about the upstream project.
 
+The primary goal of this package is to faithfully represent the protocol described in https://kgb.alioth.debian.org/kgb-protocol.html without too many frills.
+
 	package main
 
 	import (
