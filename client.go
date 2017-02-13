@@ -45,10 +45,12 @@ func (p Project) RelayMessage(msg string) error {
 
 // CommitV4Args is for Project.CommitV4 (see https://kgb.alioth.debian.org/kgb-protocol.html#commit_v4_arguments).
 type CommitV4Args struct {
-	// A string identifying the commit in the version control system. Git (short) hash, Subversion revision number, this kind of thing.
+	// A string identifying the commit in the version control system. Git
+	// (short) hash, Subversion revision number, this kind of thing.
 	CommitId string `json:"commit_id"`
 
-	// A string to prepend to the commit ID when displaying on IRC. r is particularly useful for Subversion repositories.
+	// A string to prepend to the commit ID when displaying on IRC. r is
+	// particularly useful for Subversion repositories.
 	RevPrefix string `json:"rev_prefix"`
 
 	// A string representing the commit author.
@@ -63,16 +65,22 @@ type CommitV4Args struct {
 	// The commit message.
 	CommitLog string `json:"commit_log"`
 
-	// List of changes files/directories in the commit. Each string is a path, optionaly prepended with (A) for added paths, (M) for modified paths and (D) for deleted paths. If no prefix is given modification is assumed. An additional plus sign flags property changes (Specific to Subversion term), e.g. (M+).
+	// List of changes files/directories in the commit. Each string is a path,
+	// optionaly prepended with (A) for added paths, (M) for modified paths and
+	// (D) for deleted paths. If no prefix is given modification is assumed. An
+	// additional plus sign flags property changes (Specific to Subversion
+	// term), e.g. (M+).
 	Changes []string `json:"changes"`
 
 	// A map with additional parameters. Currently supported members are:
 	//
 	// web_link: A URL with commit details (e.g. gitweb or viewvc).
 	//
-	// use_irc_notices: A flag whether to use IRC notices instead of regular messages.
+	// use_irc_notices: A flag whether to use IRC notices instead of regular
+	// messages.
 	//
-	// use_color: A flag whether to use colors when sending commit notifications. Defaults to 1.
+	// use_color: A flag whether to use colors when sending commit
+	// notifications. Defaults to 1.
 	Extra map[string]interface{} `json:"extra"`
 }
 
