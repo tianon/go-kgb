@@ -25,7 +25,7 @@ The primary goal of this package is to faithfully represent the protocol describ
 			Branch:    "master",
 			CommitLog: "Updated the evil master plan",
 			Changes: []string{
-				"M master-plan.md",
+				"(M)master-plan.md",
 			},
 			Extra: map[string]interface{}{
 				"web_link":        "https://godoc.org/go.tianon.xyz/kgb",
